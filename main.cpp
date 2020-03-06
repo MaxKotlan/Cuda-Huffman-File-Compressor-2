@@ -3,9 +3,9 @@
 #include <vector>
 #include <map>
 #include <fstream>
-#include <string> 
+#include <string>
+#include <functional>
 
-/*Datastructure Which Holds a character, and an integer with the number of occurences in a file*/
 struct Node {
 	char character;
 	unsigned int frequency;
@@ -16,7 +16,12 @@ struct Node {
 		return a.frequency > b.frequency;
 	}
 };
-/*HashmapForCharacterFrequency*/
+
+struct HuffmanCode{
+    char path;
+    uint_least8_t shift; 
+};
+
 typedef std::vector<Node> FrequencyMap;
 
 FrequencyMap GetFileCharacterFrequencies() {
@@ -61,7 +66,6 @@ Node* buildHuffmanTree(FrequencyMap& map) {
 		*rchild = map.front();
 		std::pop_heap(map.begin(), map.end(), Node()); map.pop_back();
 
-        parent->character = '%';
 		parent->frequency += lchild->frequency + rchild->frequency;
 
 		parent->lchild = lchild;
@@ -74,16 +78,25 @@ Node* buildHuffmanTree(FrequencyMap& map) {
 	return root;
 }
 
-void preorder(Node *root) {
-   if (root != nullptr) {   
-      std::cout << "[ " << root->character<< ", " <<root->frequency<<"] ";
-      preorder(root->lchild);
-      preorder(root->rchild);
-   }
-} 
+HuffmanCode* convertTreeToHashmap(Node* root){
+    HuffmanCode hashmap[256];
+    std::function<void(Node*)> preorder = [&](Node* root) {
+        if (root != nullptr) {  
+            std::cout << "0"; 
+            preorder(root->lchild);
+            preorder(root->rchild);
+            std::cout << "1";
+
+            if (root->lchild == nullptr && root->rchild == nullptr)
+                std::cout << " : " << root->character << std::endl;
+        }
+    };
+    preorder(root);
+    return {};
+}
 
 int main() {
 	FrequencyMap map = GetFileCharacterFrequencies();
 	Node* root = buildHuffmanTree(map);
-    preorder(root);
+    convertTreeToHashmap(root);
 }
