@@ -10,9 +10,8 @@ typedef std::pair<char, unsigned int> CharacterFrequency;
 /*HashmapForCharacterFrequency*/
 typedef std::vector<CharacterFrequency> FrequencyMap;
 
-FrequencyMap findFileFrequencies(){
+FrequencyMap GetFileCharacterFrequencies(){
     std::ifstream fin("Compress.exe", std::ifstream::binary);
-    std::cout << sizeof(char);
     FrequencyMap hashmap(256);
 
     std::vector<char> buffer (1024); 
@@ -33,31 +32,56 @@ struct greaters{
     return a.second>=b.second; 
   } 
 }; 
-  
 
-int main(){
-    auto map = findFileFrequencies();
+struct node{
+    node* lchild = nullptr;
+    node* rchild = nullptr;
+    CharacterFrequency value;
+};
 
-    for (auto it = map.begin(); it != map.end(); it++){
-        std::cout << it->second << " ";
-    }std::cout << std::endl << std::endl;
-
+/*builds tree and returns root node*/
+node* buildHuffmanTree(FrequencyMap &map){
+    /*Turn Hashmap into a Heap*/
     std::make_heap(map.begin(), map.end(), greaters());
-
-    for (auto it = map.begin(); it != map.end(); it++){
-        std::cout << it->second << " ";
-    }std::cout << std::endl << std::endl;
 
     /*Remove All Characters with Zero Frequencies from the Heap*/
     while (map.front().second == 0) {
         std::pop_heap (map.begin(),map.end(), greaters()); map.pop_back();
     }
-    
-    /*Remove All Zeros from the heap*/
+
+    /*Build a Huffman Tree*/
+    node* root = nullptr;
     while (map.size() > 0) {
-        std::cout << map.front().second << " ";
+        /*Allocate 3 nodes dynamically*/
+        node* lchild = new node();
+        node* rchild = new node();
+        node* parent = new node();
+
+        lchild->value = map.front();
         std::pop_heap (map.begin(),map.end(), greaters()); map.pop_back();
-        //std::sort_heap (map.begin(),map.end());
+        
+        rchild->value = map.front();
+        std::pop_heap (map.begin(),map.end(), greaters()); map.pop_back();
+
+        parent->value.second += lchild->value.second + rchild->value.second;
+        
+        parent->lchild = lchild;
+        parent->rchild = rchild;
+
+        root = parent;
+
+        map.push_back(parent->value); std::push_heap(map.begin(),map.end(), greaters());
+    }
+    return root;
+}
+
+int main(){
+    FrequencyMap map = GetFileCharacterFrequencies();
+    node* root = buildHuffmanTree(map);
+    std::cout << root->lchild << std::endl;
+    while (root->lchild != nullptr){
+        std::cout << root->value.second << ", ";
+        root = root->lchild;
     }
 
 /*
