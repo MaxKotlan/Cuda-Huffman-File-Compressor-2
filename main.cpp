@@ -20,7 +20,7 @@ struct Node {
 typedef std::vector<Node> FrequencyMap;
 
 FrequencyMap GetFileCharacterFrequencies() {
-	std::ifstream fin("main.cpp", std::ifstream::binary);
+	std::ifstream fin("lotr.txt", std::ifstream::binary);
 	FrequencyMap hashmap(256);
 
 	std::vector<char> buffer(1024);
@@ -61,6 +61,7 @@ Node* buildHuffmanTree(FrequencyMap& map) {
 		*rchild = map.front();
 		std::pop_heap(map.begin(), map.end(), Node()); map.pop_back();
 
+        parent->character = '%';
 		parent->frequency += lchild->frequency + rchild->frequency;
 
 		parent->lchild = lchild;
@@ -73,12 +74,16 @@ Node* buildHuffmanTree(FrequencyMap& map) {
 	return root;
 }
 
+void preorder(Node *root) {
+   if (root != nullptr) {   
+      std::cout << "[ " << root->character<< ", " <<root->frequency<<"] ";
+      preorder(root->lchild);
+      preorder(root->rchild);
+   }
+} 
+
 int main() {
 	FrequencyMap map = GetFileCharacterFrequencies();
 	Node* root = buildHuffmanTree(map);
-
-	while (root->lchild != nullptr){
-	    std::cout << root->lchild->character << ", ";
-	    root = root->lchild;
-	}
+    preorder(root);
 }
