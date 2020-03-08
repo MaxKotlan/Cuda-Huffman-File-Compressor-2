@@ -51,6 +51,8 @@ public:
 			std::pop_heap(map.begin(), map.end(), Node()); map.pop_back();
 			removedCount++;
 		}
+
+		/*Keep track of the number of nodes and leaf nodes */
 		size = (MAX_NODES - removedCount);
 		leaf_size = size;
 
@@ -71,7 +73,6 @@ public:
 			size++;
 			if (map.size() == 1) root = parent;
 		}
-		std::cout << "There are " << leaf_size << " Leaf Nodes";
 	};
 
 
@@ -92,7 +93,6 @@ public:
 			if (root != nullptr) {
 
 				if (isLeaf(root)) {
-					//std::cout << str << " - " << stoi(str, 0, 2) << " : " << root->character << " - " << root->frequency << std::endl;
 					hashmap[root->character].path = stoi(str, 0, 2);
 					hashmap[root->character].digits = str.length();
 				}
