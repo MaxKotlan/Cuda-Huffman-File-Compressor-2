@@ -86,19 +86,17 @@ Node* buildHuffmanTree(FrequencyMap& map) {
 
 HuffmanCode* convertTreeToHashmap(Node* root){
     HuffmanCode hashmap[256];
-    std::function<void(Node*)> preorder = [&](Node* root) {
+    std::function<void(Node*, std::string)> preorder = [&](Node* root, std::string str) {
         if (root != nullptr) {  
             
             if (root->lchild == nullptr || root->rchild == nullptr)
-                std::cout << " : " << root->character << " - " << root->frequency << " ";
+                std::cout << " : " << root->character << " - " << root->frequency << " " << str << std::endl;
 
-            std::cout << "0"; 
-            preorder(root->lchild);
-            std::cout << "1";
-            preorder(root->rchild);
+            preorder(root->lchild, str + "0");
+            preorder(root->rchild, str + "1");
         }
     };
-    preorder(root);
+    preorder(root, "");
     return {};
 }
 
