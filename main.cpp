@@ -26,15 +26,15 @@ bool isLeaf(Node* node){
 }
 
 struct HuffmanCode{
-    char path;
-    uint_least8_t shift; 
+	unsigned int path;
+    unsigned int digits;
 };
 
 typedef std::vector<Node> FrequencyMap;
 
 FrequencyMap GetFileCharacterFrequencies() {
 	FILE *file;
-	file = fopen("E:/SteamLibrary/steamapps/common/Tom Clancy's Rainbow Six Siege/datapc64_merged_bnk_000000012_textures3.forge", "rb");
+	file = fopen("lotr.txt", "rb");
 	FrequencyMap hashmap(256);
 
 	fseek(file, 0, SEEK_END);
@@ -76,12 +76,7 @@ Node* buildHuffmanTree(FrequencyMap& map) {
 
         parent->frequency += lchild.frequency + rchild.frequency;
 		parent->lchild = new Node(lchild);
-		//printNode(parent->lchild);
-
 		parent->rchild = new Node(rchild);
-		//printNode(parent->rchild);
-		//std::cout << std::endl;
-
 
 		map.push_back(*parent); std::push_heap(map.begin(), map.end(), Node());
 	}
@@ -91,12 +86,12 @@ Node* buildHuffmanTree(FrequencyMap& map) {
 }
 
 HuffmanCode* convertTreeToHashmap(Node* root){
-    HuffmanCode hashmap[256];
+    HuffmanCode* hashmap = new HuffmanCode[256];
     std::function<void(Node*, std::string)> preorder = [&](Node* root, std::string str) {
         if (root != nullptr) {  
             
             if (root->lchild == nullptr || root->rchild == nullptr)
-                std::cout << str << " : " << root->character << " - " << root->frequency << std::endl;
+                std::cout << str << " - " << stoi(str, 0, 2) << " : " << root->character << " - " << root->frequency << std::endl;
 
             preorder(root->lchild, str + "0");
             preorder(root->rchild, str + "1");
