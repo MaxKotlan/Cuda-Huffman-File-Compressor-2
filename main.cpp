@@ -11,11 +11,19 @@ struct Node {
 	unsigned int frequency;
     Node* lchild = nullptr;
     Node* rchild = nullptr;
-
 	bool operator()(const Node& a, const Node& b) const {
 		return a.frequency > b.frequency;
 	}
 };
+
+void printNode(Node* n){
+	if (n != nullptr)
+		std::cout << n << "{ char: " << n->character << ", freq: " << n->frequency << ", lchild: " << n->lchild << " rchild: " << n->rchild << " }"; 
+}
+
+bool isLeaf(Node* node){
+    return node->lchild == nullptr || node->rchild == nullptr;
+}
 
 struct HuffmanCode{
     char path;
@@ -25,7 +33,7 @@ struct HuffmanCode{
 typedef std::vector<Node> FrequencyMap;
 
 FrequencyMap GetFileCharacterFrequencies() {
-	std::ifstream fin("lotr.txt", std::ifstream::binary);
+	std::ifstream fin("hello.txt", std::ifstream::binary);
 	FrequencyMap hashmap(256);
 
 	std::vector<char> buffer(1024);
@@ -50,53 +58,62 @@ Node* buildHuffmanTree(FrequencyMap& map) {
 		std::pop_heap(map.begin(), map.end(), Node()); map.pop_back();
 	}
 
-    Node* root = nullptr;
 	/*Build a Huffman Tree*/
 	while (map.size() > 1) {
-		/*Allocate 3 nodes dynamically*/
-		Node* lchild = new Node();
-		Node* rchild = new Node();
 		Node* parent = new Node();
 
-        root = parent;
-
-		*lchild = map.front();
+		Node lchild = map.front();
 		std::pop_heap(map.begin(), map.end(), Node()); map.pop_back();
 
-		*rchild = map.front();
+		Node rchild = map.front();
 		std::pop_heap(map.begin(), map.end(), Node()); map.pop_back();
 
-		parent->frequency += lchild->frequency + rchild->frequency;
+        parent->frequency += lchild.frequency + rchild.frequency;
+		parent->lchild = new Node(lchild);
+		printNode(parent->lchild);
 
-		parent->lchild = lchild;
-		parent->rchild = rchild;
+		parent->rchild = new Node(rchild);
+		printNode(parent->rchild);
+		std::cout << std::endl;
 
-		root = parent;
 
 		map.push_back(*parent); std::push_heap(map.begin(), map.end(), Node());
 	}
-	return root;
+	printNode(&map.front());
+
+	return &map.front();
 }
 
 HuffmanCode* convertTreeToHashmap(Node* root){
     HuffmanCode hashmap[256];
     std::function<void(Node*)> preorder = [&](Node* root) {
         if (root != nullptr) {  
+            
+            if (root->lchild == nullptr || root->rchild == nullptr)
+                std::cout << " : " << root->character << " - " << root->frequency << " ";
+
             std::cout << "0"; 
             preorder(root->lchild);
-            preorder(root->rchild);
             std::cout << "1";
-
-            if (root->lchild == nullptr && root->rchild == nullptr)
-                std::cout << " : " << root->character << std::endl;
+            preorder(root->rchild);
         }
     };
     preorder(root);
     return {};
 }
 
+void print(Node* root){
+    if (root != nullptr){
+        print(root->lchild);
+        if (root->lchild == nullptr || root->rchild == nullptr)
+            std::cout << root->character << std::endl;
+        print(root->rchild);
+    }
+}
+
 int main() {
 	FrequencyMap map = GetFileCharacterFrequencies();
 	Node* root = buildHuffmanTree(map);
+    print(root);
     convertTreeToHashmap(root);
 }
