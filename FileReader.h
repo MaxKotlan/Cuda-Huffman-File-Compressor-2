@@ -31,7 +31,9 @@ class FileReader {
 			unsigned char letter = buffer[i];
 			hashmap[letter].character = letter;
 			hashmap[letter].frequency++;
-		}	delete[] buffer;
+		}	
+		
+		delete[] buffer;
 
 		return std::move(hashmap);
 	}
@@ -45,18 +47,17 @@ class FileReader {
 		unsigned char* buffer = new unsigned char[length];
 		fread(buffer, length, 1, file);
 
+		int previous = 0;
 		for (int i = 0; i < length; i++) {
 			unsigned char letter = buffer[i];
-			print(hash[letter]);
+			//print(hash[letter]);
 		}
 
 		delete[] buffer;
 	}
 
-
 	private:
 		FILE* file;
-
 };
 
 #endif
