@@ -33,18 +33,24 @@ struct HuffmanCode{
 typedef std::vector<Node> FrequencyMap;
 
 FrequencyMap GetFileCharacterFrequencies() {
-	std::ifstream fin("hello.txt", std::ifstream::binary);
+	FILE *file;
+	file = fopen("E:/SteamLibrary/steamapps/common/Tom Clancy's Rainbow Six Siege/datapc64_merged_bnk_000000012_textures3.forge", "rb");
 	FrequencyMap hashmap(256);
 
-	std::vector<char> buffer(1024);
-	do {
-		fin.read(buffer.data(), buffer.size());
-		for (int i = 0; i < fin.gcount(); i++) {
-			char letter = buffer[i];
-			hashmap[letter].character = letter;
-			hashmap[letter].frequency++;
-		}
-	} while (fin);
+	fseek(file, 0, SEEK_END);
+	int length=ftell(file);
+	fseek(file, 0, SEEK_SET);
+
+	char* buffer=(char *)malloc(length+1);
+	fread(buffer, length, 1, file);
+	fclose(file);
+
+	for (int i = 0; i < length; i++){
+		char letter = buffer[i];
+		hashmap[letter].character = letter;
+		hashmap[letter].frequency++;
+	}
+
 	return hashmap;
 }
 
@@ -70,11 +76,11 @@ Node* buildHuffmanTree(FrequencyMap& map) {
 
         parent->frequency += lchild.frequency + rchild.frequency;
 		parent->lchild = new Node(lchild);
-		printNode(parent->lchild);
+		//printNode(parent->lchild);
 
 		parent->rchild = new Node(rchild);
-		printNode(parent->rchild);
-		std::cout << std::endl;
+		//printNode(parent->rchild);
+		//std::cout << std::endl;
 
 
 		map.push_back(*parent); std::push_heap(map.begin(), map.end(), Node());
@@ -90,7 +96,7 @@ HuffmanCode* convertTreeToHashmap(Node* root){
         if (root != nullptr) {  
             
             if (root->lchild == nullptr || root->rchild == nullptr)
-                std::cout << " : " << root->character << " - " << root->frequency << " " << str << std::endl;
+                std::cout << str << " : " << root->character << " - " << root->frequency << std::endl;
 
             preorder(root->lchild, str + "0");
             preorder(root->rchild, str + "1");
@@ -100,18 +106,8 @@ HuffmanCode* convertTreeToHashmap(Node* root){
     return {};
 }
 
-void print(Node* root){
-    if (root != nullptr){
-        print(root->lchild);
-        if (root->lchild == nullptr || root->rchild == nullptr)
-            std::cout << root->character << std::endl;
-        print(root->rchild);
-    }
-}
-
 int main() {
 	FrequencyMap map = GetFileCharacterFrequencies();
 	Node* root = buildHuffmanTree(map);
-    print(root);
     convertTreeToHashmap(root);
 }
