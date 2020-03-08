@@ -5,6 +5,8 @@
 #include <fstream>
 #include <string>
 #include <functional>
+#include <bitset>
+
 
 struct Node {
 	char character;
@@ -29,6 +31,11 @@ struct HuffmanCode{
 	unsigned int path;
     unsigned int digits;
 };
+
+/*Converts from huffman code to binary*/
+void print(const HuffmanCode &huff){
+	std::cout << std::bitset<8*sizeof(unsigned int)>(huff.path).to_string().substr(8*sizeof(unsigned int)-huff.digits);
+}
 
 typedef std::vector<Node> FrequencyMap;
 
@@ -56,7 +63,7 @@ FrequencyMap GetFileCharacterFrequencies() {
 
 /*builds tree and returns root node*/
 Node* buildHuffmanTree(FrequencyMap& map) {
-	/*Turn Hashmap into a Heap*/
+	/*Turn Hashmap into a Heap Using bottom up construction O(n)*/
 	std::make_heap(map.begin(), map.end(), Node());
 
 	/*Remove All Characters with Zero Frequencies from the Heap*/
@@ -64,7 +71,6 @@ Node* buildHuffmanTree(FrequencyMap& map) {
 		std::pop_heap(map.begin(), map.end(), Node()); map.pop_back();
 	}
 
-	/*Build a Huffman Tree*/
 	while (map.size() > 1) {
 		Node* parent = new Node();
 
@@ -80,9 +86,7 @@ Node* buildHuffmanTree(FrequencyMap& map) {
 
 		map.push_back(*parent); std::push_heap(map.begin(), map.end(), Node());
 	}
-	printNode(&map.front());
-
-	return &map.front();
+	return map.size() > 0 ? &map.front() : nullptr;
 }
 
 HuffmanCode* convertTreeToHashmap(Node* root){
@@ -90,19 +94,23 @@ HuffmanCode* convertTreeToHashmap(Node* root){
     std::function<void(Node*, std::string)> preorder = [&](Node* root, std::string str) {
         if (root != nullptr) {  
             
-            if (root->lchild == nullptr || root->rchild == nullptr)
+            if (isLeaf(root)){
                 std::cout << str << " - " << stoi(str, 0, 2) << " : " << root->character << " - " << root->frequency << std::endl;
+				hashmap[root->character].path   = stoi(str, 0, 2);
+				hashmap[root->character].digits = str.length();
+			}
 
             preorder(root->lchild, str + "0");
             preorder(root->rchild, str + "1");
         }
     };
     preorder(root, "");
-    return {};
+    return hashmap;
 }
 
 int main() {
 	FrequencyMap map = GetFileCharacterFrequencies();
 	Node* root = buildHuffmanTree(map);
-    convertTreeToHashmap(root);
+    HuffmanCode* hashmap = convertTreeToHashmap(root);
+	print(hashmap['T']);
 }
