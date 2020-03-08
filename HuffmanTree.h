@@ -52,6 +52,7 @@ public:
 			removedCount++;
 		}
 		size = (MAX_NODES - removedCount);
+		leaf_size = size;
 
 		while (map.size() > 1) {
 			Node* parent = new Node();
@@ -70,6 +71,7 @@ public:
 			size++;
 			if (map.size() == 1) root = parent;
 		}
+		std::cout << "There are " << leaf_size << " Leaf Nodes";
 	};
 
 
@@ -104,28 +106,31 @@ public:
 	};
 
 
-	/*Generates Header which contains all the nodes in the tree append to top of compressed file
-	Stores bytes in little endian order, and stores nodes in preorder.
+	/*Generates Header which contains the leaf nodes in the tree append to top of compressed file
+	Stores bytes in little endian order, and stores nodes in preorder. Using the leafnodes, we can regenerate the tree
+	when it's loaded in again
 	*/
 	std::vector<unsigned char> generateFileHeader() {
-		unsigned int headerBytesNeeded = sizeof(unsigned int) + sizeof(unsigned short) + size * (sizeof(unsigned char) + sizeof(unsigned int));
+		unsigned int headerBytesNeeded = sizeof(unsigned int) + sizeof(unsigned short) + leaf_size * (sizeof(unsigned char) + sizeof(unsigned int));
 		std::vector<unsigned char> header(headerBytesNeeded);
 		/*Magic Bytes for Identifying File*/
 		header[0] = 0x1B; header[1] = 0x0B; header[2] = 0x3E; header[3] = 0x70;
 		/*Number of Nodes as a ushort*/
 		for (int i = 0; i < sizeof(unsigned short); i++)
-			header[sizeof(unsigned int)+i] = static_cast<unsigned char*>(static_cast<void*>(&size))[i];
+			header[sizeof(unsigned int)+i] = static_cast<unsigned char*>(static_cast<void*>(&leaf_size))[i];
 		
 		int nodeIndex = sizeof(unsigned short)+sizeof(unsigned int);
 		std::function<void(Node*)> preorder = [&](Node* root) {
 			if (root != nullptr) {
 
-				/*Node character*/
-				header[nodeIndex] = root->character;
-				/*Node frequency*/
-				for (int i = 0; i < sizeof(unsigned int); i++)
-					header[nodeIndex+sizeof(unsigned char)+i] = static_cast<unsigned int*>(static_cast<void*>(&root->frequency))[i];
-				nodeIndex+=sizeof(unsigned char)+sizeof(unsigned int);
+				if (isLeaf(root)){
+					/*Node character*/
+					header[nodeIndex] = root->character;
+					/*Node frequency*/
+					for (int i = 0; i < sizeof(unsigned int); i++)
+						header[nodeIndex+sizeof(unsigned char)+i] = static_cast<unsigned int*>(static_cast<void*>(&root->frequency))[i];
+					nodeIndex+=sizeof(unsigned char)+sizeof(unsigned int);
+				}
 
 				preorder(root->lchild);
 				preorder(root->rchild);
@@ -143,6 +148,7 @@ public:
 private:
 	Node* root;
 	unsigned short size;
+	unsigned short leaf_size;
 };
 
 #endif

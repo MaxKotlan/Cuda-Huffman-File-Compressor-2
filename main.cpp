@@ -7,7 +7,7 @@ int main(int argc, char** argv) {
 	Startup::Init(argc, argv);
 	std::cout << Startup::Instance().MaximumRam() << std::endl;
 
-	FileReader fr("lotr.txt");
+	FileReader fr("hello.txt");
 	FrequencyMap map = fr.GetCharacterFrequencies();
 	HuffmanTree tree = HuffmanTree(map);
 	std::vector<HuffmanCode> encryptionMap = tree.convertToHashmap();
