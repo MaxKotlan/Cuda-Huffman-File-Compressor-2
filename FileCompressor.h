@@ -80,7 +80,7 @@ class FileCompressor {
 						shiftregister = 0;
 					}
 				}
-				fwrite(buffer.data(), sizeof(unsigned char), length, compressed);
+				fwrite(buffer.data(), buffer.size(), 1, compressed);
 			}	
 		}
 
