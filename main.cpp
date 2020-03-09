@@ -10,8 +10,5 @@ int main(int argc, char** argv) {
 	FileReader fr("hello.txt");
 	FrequencyMap map = fr.GetCharacterFrequencies();
 	HuffmanTree tree = HuffmanTree(map);
-	std::vector<HuffmanCode> compressionMap = tree.convertToHashmap();
-	fr.printCompressed(compressionMap);
-	tree.generateFileHeader();
-	tree.printFrequencies();
+	fr.saveCompressed(tree);
 }
