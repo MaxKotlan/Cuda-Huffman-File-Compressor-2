@@ -2,6 +2,7 @@
 #define FILEREADER_H
 
 #include <iostream>
+#include <assert.h>
 #include <vector>
 #include <iomanip>
 #include "Startup.h"
@@ -75,16 +76,25 @@ class FileCompressor {
 				unsigned char letter = inputBuffer[i];
 				HuffmanCode code = compressionMap[letter];
 
-				if (code.shift + shiftregister < 7){
-				shiftregister = shiftregister << code.shift;
-				shiftregister = (shiftregister << code.shift) | code.path;  
-				shiftcount += code.shift;
+				if (((code.shift-1) + shiftcount) < 7){
+					shiftregister = (shiftregister << code.shift) | code.path;  
+					shiftcount += code.shift;
+				} else {
+					do {
+						
+					} while (shiftcount + code.shift >= 8);
 				}
-				if (shiftcount >= 8){
+				
+				assert(shiftcount < 8);
+				if (shiftcount >= 7){
+					outputBuffer.push_back(shiftregister);
 					shiftcount = 0;
 					shiftregister = 0;
 				}
-				outputBuffer.push_back(shiftregister);
+				for (int i = 0; i < outputBuffer.size(); i++){
+					std::cout << std::hex << (int)outputBuffer[i] << " ";
+				}
+
 				if (outputBuffer.size() == bufferSize || (j+i) < length){
 					fwrite(outputBuffer.data(), outputBuffer.size(), 1, compressed);
 					outputBuffer.resize(0);
