@@ -14,7 +14,7 @@ class FileCompressor {
 
 	FileCompressor(std::string fileName){
 		original = fopen(fileName.c_str(), "rb");
-		compressed = fopen((fileName.substr(0, fileName.find('.')) + ".huff" ).c_str() , "wb");
+		compressed = fopen((fileName.substr(0, fileName.find('.')) + ".kot" ).c_str() , "wb");
 	}
 
 	~FileCompressor() {
@@ -64,29 +64,43 @@ class FileCompressor {
 
 		unsigned int bufferSize = Startup::Instance().fileBufferDisabled() ? length : Startup::Instance().fileBufferSize(); 
 
-		std::vector<unsigned char> buffer(bufferSize);
+		std::vector<unsigned char>  inputBuffer(bufferSize);
+		std::vector<unsigned char> outputBuffer(bufferSize);
+		outputBuffer.resize(0);
+
 		for (unsigned int j = 0; j < length; j+= bufferSize){
-			fread(buffer.data(), buffer.size(), 1, original);
+			fread(inputBuffer.data(), inputBuffer.size(), 1, original);
 			unsigned int i = 0;
-			for (i = 0; i < buffer.size() && (j +i) < length; i++) {
-				unsigned char letter = buffer[i];
+			for (i = 0; i < inputBuffer.size() && (j +i) < length; i++) {
+				unsigned char letter = inputBuffer[i];
 				HuffmanCode code = compressionMap[letter];
 
+				if (code.shift + shiftregister < 7){
+				shiftregister = shiftregister << code.shift;
 				shiftregister = (shiftregister << code.shift) | code.path;  
 				shiftcount += code.shift;
-				buffer[i] = shiftregister;
-				if (shiftcount >= 7){
+				}
+				if (shiftcount >= 8){
 					shiftcount = 0;
 					shiftregister = 0;
 				}
+				outputBuffer.push_back(shiftregister);
+				if (outputBuffer.size() == bufferSize || (j+i) < length){
+					fwrite(outputBuffer.data(), outputBuffer.size(), 1, compressed);
+					outputBuffer.resize(0);
+				}
 			}	
-			fwrite(buffer.data(), i, 1, compressed);
 		}
 
 		fclose(compressed);
 	}
 
 	private:
+
+		void clearAndWriteBuffer(std::vector<unsigned char>& buffer, unsigned int length){
+			fwrite(buffer.data(), length, 1, compressed);
+		}
+
 		FILE* original;
 		FILE* compressed;
 };
