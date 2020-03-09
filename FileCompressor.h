@@ -1,5 +1,6 @@
 #ifndef FILEREADER_H
 #define FILEREADER_H
+
 #include <iostream>
 #include <vector>
 #include <iomanip>
@@ -33,12 +34,12 @@ class FileCompressor {
 		std::vector<unsigned char> buffer(bufferSize);
 		for (unsigned int j = 0; j < length; j+= bufferSize){
 			fread(buffer.data(), buffer.size(), 1, original);
-			for (unsigned int i = 0; i < buffer.size(); i++) {
-				if (j +i < length){
-					unsigned char letter = buffer[i];
-					hashmap[letter].character = letter;
-					hashmap[letter].frequency++;
-				}
+			for (unsigned int i = 0; i < buffer.size() && (j +i) < length; i++) {
+
+				unsigned char letter = buffer[i];
+				hashmap[letter].character = letter;
+				hashmap[letter].frequency++;
+
 			}	
 		}
 		
