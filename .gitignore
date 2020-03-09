@@ -2,3 +2,6 @@
 *.exe
 *.exp
 *.lib
+*.out
+*.huff
+*.pdb
