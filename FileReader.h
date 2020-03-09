@@ -12,7 +12,7 @@ class FileReader {
 
 	FileReader(std::string fileName){
 		original = fopen(fileName.c_str(), "rb");
-		compressed = fopen((fileName.substr(0, fileName.find('.')) + ".huff" ).c_str() , "w");
+		compressed = fopen((fileName.substr(0, fileName.find('.')) + ".huff" ).c_str() , "wb");
 	}
 
 	~FileReader() {
@@ -52,9 +52,6 @@ class FileReader {
 		unsigned char* buffer = new unsigned char[length];
 		fread(buffer, length, 1, original);
 
-		unsigned int shiftcount = 0;
-		unsigned char shiftregister = 0;
-
 		std::vector<HuffmanCode> compressionMap = htree.convertToHashmap();
 		std::vector<unsigned char> fileHeader = htree.generateFileHeader();
 
@@ -63,19 +60,33 @@ class FileReader {
 		}
 
 		/*write file header*/
+		unsigned int shiftcount = 0;
+		unsigned char shiftregister = 0;
 		fwrite(fileHeader.data(), sizeof(unsigned char), fileHeader.size(), compressed);
 		for (int i = 0; i < length; i++) {
 			unsigned char letter = buffer[i];
 			HuffmanCode code = compressionMap[letter];
 
+			shiftregister = (shiftregister << code.shift) | code.path;  
+			shiftcount += code.shift;
+			std::cout << std::setw(2) << std::setfill('0') << std::hex << (int)static_cast<unsigned char*>(static_cast<void*>(&shiftregister))[0] << " ";
+			std::cout << std::bitset<8>(shiftregister) << std::endl;
+			if (shiftcount >= 7){
+				shiftcount = 0;
+				shiftregister = 0;
+				std::cout << "-^-";
+			}
+			/*
 			bool canFitInRegister = (shiftcount+code.shift) < 8;
 			if (canFitInRegister){				
-				shiftregister = (shiftregister << code.shift) | code.path;
+				shiftregister = (shiftregister << (code.shift+1)) | code.path;
 				shiftcount += code.shift;
-				buffer[i] = static_cast<unsigned char*>(static_cast<void*>(&shiftregister))[0];
+				//buffer[i] = static_cast<unsigned char*>(static_cast<void*>(&shiftregister))[0];
+				std::cout << std::setw(2) << std::setfill('0') << std::hex << (int)static_cast<unsigned char*>(static_cast<void*>(&shiftregister))[0] << " ";
+				std::cout << std::bitset<8>(shiftregister) << std::endl;
 				//std::cout << std::setw(2) << std::setfill('0') << std::hex << (int)static_cast<unsigned char*>(static_cast<void*>(&shiftregister))[0] << " ";
 				//std::cout << std::bitset<8>(shiftregister) << std::endl;
-			} else {
+			} else{
 				do {
 					unsigned int spaceToFill = 8 - shiftcount;
 					unsigned char bitstofit = (unsigned char)(code.path >> (unsigned int)(sizeof(code.path) - spaceToFill));
@@ -85,12 +96,22 @@ class FileReader {
 					//shiftregister +=  ((code.path << (code.shift - (8 - shiftcount)) >> (code.shift - (8 - shiftcount))));
 					shiftregister = (shiftregister << spaceToFill) | bitstofit;
 					buffer[i] = static_cast<unsigned char*>(static_cast<void*>(&shiftregister))[0];
-					//std::cout << std::setw(2) << std::setfill('0') << std::hex << (int)static_cast<unsigned char*>(static_cast<void*>(&shiftregister))[0] << " ";
-					//std::cout << std::bitset<8>(shiftregister) << std::endl;
+					std::cout << std::setw(2) << std::setfill('0') << std::hex << (int)static_cast<unsigned char*>(static_cast<void*>(&shiftregister))[0] << " ";
+					std::cout << std::bitset<8>(shiftregister) << std::endl;
 					shiftcount = 0;
 					shiftregister = 0;
 				} while (shiftcount + code.shift >= 8);
 			}
+
+			if(shiftcount >= 8) { 
+				std::cout << std::setw(2) << std::setfill('0') << std::hex << (int)static_cast<unsigned char*>(static_cast<void*>(&shiftregister))[0] << " ";
+				std::cout << std::bitset<8>(shiftregister) << std::endl;
+
+				buffer[i] = static_cast<unsigned char*>(static_cast<void*>(&shiftregister))[0];
+				shiftcount = 0;
+				shiftregister = 0;
+			}*/
+
 			//shiftregister = shiftregister ;
 			//shiftregister +=  code.path;
 			//std::cout << std::bitset<32>(shiftregister) << std::endl;
@@ -110,7 +131,7 @@ class FileReader {
 		}
 
 		fwrite(buffer, sizeof(unsigned char), length, compressed);
-		
+
 		delete[] buffer;
 		fclose(compressed);
 	}

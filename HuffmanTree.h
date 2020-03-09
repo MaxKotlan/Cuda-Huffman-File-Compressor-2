@@ -94,7 +94,7 @@ public:
 
 				if (isLeaf(root)) {
 					hashmap[root->character].path = stoi(str, 0, 2);
-					hashmap[root->character].shift = str.length();
+					hashmap[root->character].shift = str.size();
 				}
 
 				preorder(root->lchild, str + "0");
