@@ -31,9 +31,9 @@ class FileCompressor {
 		unsigned int bufferSize = Startup::Instance().fileBufferDisabled() ? length : Startup::Instance().fileBufferSize(); 
 
 		std::vector<unsigned char> buffer(bufferSize);
-		for (int j = 0; j < length; j+= bufferSize){
+		for (unsigned int j = 0; j < length; j+= bufferSize){
 			fread(buffer.data(), buffer.size(), 1, original);
-			for (int i = 0; i < buffer.size(); i++) {
+			for (unsigned int i = 0; i < buffer.size(); i++) {
 				if (j +i < length){
 					unsigned char letter = buffer[i];
 					hashmap[letter].character = letter;
@@ -64,9 +64,9 @@ class FileCompressor {
 		unsigned int bufferSize = Startup::Instance().fileBufferDisabled() ? length : Startup::Instance().fileBufferSize(); 
 
 		std::vector<unsigned char> buffer(bufferSize);
-		for (int j = 0; j < length; j+= bufferSize){
+		for (unsigned int j = 0; j < length; j+= bufferSize){
 			fread(buffer.data(), buffer.size(), 1, original);
-			for (int i = 0; i < buffer.size(); i++) {
+			for (unsigned int i = 0; i < buffer.size(); i++) {
 				if (j +i < length){
 
 					unsigned char letter = buffer[i];
@@ -80,8 +80,8 @@ class FileCompressor {
 						shiftregister = 0;
 					}
 				}
-				fwrite(buffer.data(), buffer.size(), 1, compressed);
 			}	
+			fwrite(buffer.data(), buffer.size(), 1, compressed);
 		}
 
 		fclose(compressed);
