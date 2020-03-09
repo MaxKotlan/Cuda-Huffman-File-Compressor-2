@@ -21,11 +21,11 @@ typedef std::vector<Node> FrequencyMap;
 
 struct HuffmanCode {
 	unsigned int path;
-	unsigned int digits;
+	unsigned int shift;
 };
 
 void print(const HuffmanCode& huff) {
-	std::cout << std::bitset<8 * sizeof(unsigned int)>(huff.path).to_string().substr(8 * sizeof(unsigned int) - huff.digits);
+	std::cout << std::bitset<8 * sizeof(unsigned int)>(huff.path).to_string().substr(8 * sizeof(unsigned int) - huff.shift);
 }
 
 void printNode(Node* n) {
@@ -94,7 +94,7 @@ public:
 
 				if (isLeaf(root)) {
 					hashmap[root->character].path = stoi(str, 0, 2);
-					hashmap[root->character].digits = str.length();
+					hashmap[root->character].shift = str.length();
 				}
 
 				preorder(root->lchild, str + "0");
@@ -143,6 +143,19 @@ public:
 			std::cout << std::hex << (int)*it << " ";
 
 		return std::move(header);
+	}
+
+	void printFrequencies(){
+		std::function<void(Node*)> inorder = [&](Node* root) {
+			if (root != nullptr) {
+				if (isLeaf(root)){
+					std::cout << std::dec <<  root->character << " - " << root->frequency << std::endl;
+				}
+				inorder(root->lchild);
+				inorder(root->rchild);
+			}
+		};
+		inorder(root);
 	}
 
 private:
