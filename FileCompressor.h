@@ -94,12 +94,17 @@ class FileCompressor {
 						//unsigned char subpath = (code.path >> 1);
 						shiftregister = shiftregister << remainingBitsToFill;
 						shiftregister = shiftregister | subpath;
-						//code.path = code.path 
+						shiftcount += remainingBitsToFill;
+						code.shift = code.shift - difference;
+						code.path = ( code.path << (32 -code.shift) >> (32 - code.shift)) >> code.shift;
 						//code.path = ((code.path << (32 - (code.shift - remainingBitsToFill))) >> remainingBitsToFill >> (32- (code.shift - remainingBitsToFill)));
 
-						AddToWriteBufferAndResetRegister( outputBuffer, shiftregister, bufferSize);
-						shiftcount = difference;
-						shiftregister = 0;
+						if (shiftcount == 8) {
+							AddToWriteBufferAndResetRegister(outputBuffer, shiftregister, bufferSize);
+							shiftcount = 0;
+							shiftregister = 0;
+						}
+						shiftcount = code.shift;
 
 
 					} while (shiftcount + code.shift >= 8);
@@ -130,7 +135,7 @@ class FileCompressor {
 	private:
 
 		void AddToWriteBufferAndResetRegister(std::vector<unsigned char>& outputBuffer, unsigned char shiftRegister,  unsigned int bufferSize){
-			std::cout << std::bitset<8>(shiftRegister) << " ";
+			std::cout << std::bitset<8>(shiftRegister) << " [" << std::hex << (int)shiftRegister << "] ";
 			outputBuffer.push_back(shiftRegister);
 			if (outputBuffer.size() == bufferSize){
 				fwrite(outputBuffer.data(), outputBuffer.size(), 1, compressed);
