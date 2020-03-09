@@ -89,14 +89,16 @@ class FileCompressor {
 				} else {
 					do {
 						unsigned int remainingBitsToFill = sizeof(shiftregister)*8 - shiftcount;
-						unsigned char subpath = (code.path >> (code.shift - remainingBitsToFill));
+						unsigned int difference = code.shift - remainingBitsToFill;
+						unsigned char subpath = (code.path >> difference);
 						//unsigned char subpath = (code.path >> 1);
 						shiftregister = shiftregister << remainingBitsToFill;
 						shiftregister = shiftregister | subpath;
-						code.path = code.path - remainingBitsToFill;
+						//code.path = code.path 
+						//code.path = ((code.path << (32 - (code.shift - remainingBitsToFill))) >> remainingBitsToFill >> (32- (code.shift - remainingBitsToFill)));
 
 						AddToWriteBufferAndResetRegister( outputBuffer, shiftregister, bufferSize);
-						shiftcount = 0;
+						shiftcount = difference;
 						shiftregister = 0;
 
 
