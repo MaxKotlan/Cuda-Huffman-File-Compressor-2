@@ -84,7 +84,7 @@ public:
 				delete root;
 			}
 		};
-		deleteChildren(root);
+		//deleteChildren(root);
 	}
 
 	std::vector<HuffmanCode> convertToHashmap() {

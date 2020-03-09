@@ -75,17 +75,38 @@ class FileCompressor {
 			for (i = 0; i < inputBuffer.size() && (j +i) < length; i++) {
 				unsigned char letter = inputBuffer[i];
 				HuffmanCode code = compressionMap[letter];
-
-				if (((code.shift-1) + shiftcount) < 7){
-					shiftregister = (shiftregister << code.shift) | code.path;  
+				//code.shift;
+				if (((code.shift) + shiftcount) <= 8){
+					shiftregister = ((shiftregister << code.shift) | code.path);  
 					shiftcount += code.shift;
+					
+					if (shiftcount == 8) {
+						AddToWriteBufferAndResetRegister(outputBuffer, shiftregister, bufferSize);
+						shiftcount = 0;
+						shiftregister = 0;
+					}
+
 				} else {
 					do {
-						
+						unsigned char remainingBitsToFill = sizeof(shiftregister)*8 - shiftcount;
+						unsigned char subpath = code.path >> (sizeof(code.path)*8 - remainingBitsToFill);
+						shiftregister = shiftregister | subpath;
+						code.path = code.path - remainingBitsToFill;
+
+						AddToWriteBufferAndResetRegister( outputBuffer, shiftregister, bufferSize);
+						shiftcount = 0;
+						shiftregister = 0;
+
+
 					} while (shiftcount + code.shift >= 8);
 				}
 				
-				assert(shiftcount < 8);
+
+
+				
+				if(shiftcount == 7) {
+					std::cout << std::bitset<8>(shiftregister)  << std::endl;
+				} /*
 				if (shiftcount >= 7){
 					outputBuffer.push_back(shiftregister);
 					shiftcount = 0;
@@ -93,12 +114,14 @@ class FileCompressor {
 				}
 				for (int i = 0; i < outputBuffer.size(); i++){
 					std::cout << std::hex << (int)outputBuffer[i] << " ";
-				}
+				}*/
 
-				if (outputBuffer.size() == bufferSize || (j+i) < length){
+				/*If at the end of the datablock, write remaining bytes to file*/
+				if ((j+i) == length-1){
 					fwrite(outputBuffer.data(), outputBuffer.size(), 1, compressed);
 					outputBuffer.resize(0);
 				}
+
 			}	
 		}
 
@@ -107,8 +130,13 @@ class FileCompressor {
 
 	private:
 
-		void clearAndWriteBuffer(std::vector<unsigned char>& buffer, unsigned int length){
-			fwrite(buffer.data(), length, 1, compressed);
+		void AddToWriteBufferAndResetRegister(std::vector<unsigned char>& outputBuffer, unsigned char shiftRegister,  unsigned int bufferSize){
+			std::cout << std::hex << (int)shiftRegister << " ";
+			outputBuffer.push_back(shiftRegister);
+			if (outputBuffer.size() == bufferSize){
+				fwrite(outputBuffer.data(), outputBuffer.size(), 1, compressed);
+				outputBuffer.resize(0);
+			}
 		}
 
 		FILE* original;
