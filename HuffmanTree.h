@@ -4,6 +4,7 @@
 #include <string>
 #include <algorithm>
 #include <functional>
+#include <assert.h>
 
 #define MAX_NODES 256
 
@@ -93,6 +94,10 @@ public:
 			if (root != nullptr) {
 
 				if (isLeaf(root)) {
+					if (str.size() >= (sizeof(HuffmanCode::path) * 8)) {
+						std::cout << "ERROR: Implementation requires tree to have a Max Depth of " << sizeof(HuffmanCode::path) * 8 << "! This branch has a depth of " << str.size() << std::endl;
+						exit(-1);
+					}
 					hashmap[root->character].path = stoi(str, 0, 2);
 					hashmap[root->character].shift = str.size();
 				}
