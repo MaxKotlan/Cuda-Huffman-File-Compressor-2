@@ -66,22 +66,20 @@ class FileCompressor {
 		std::vector<unsigned char> buffer(bufferSize);
 		for (unsigned int j = 0; j < length; j+= bufferSize){
 			fread(buffer.data(), buffer.size(), 1, original);
-			for (unsigned int i = 0; i < buffer.size(); i++) {
-				if (j +i < length){
+			unsigned int i = 0;
+			for (i = 0; i < buffer.size() && (j +i) < length; i++) {
+				unsigned char letter = buffer[i];
+				HuffmanCode code = compressionMap[letter];
 
-					unsigned char letter = buffer[i];
-					HuffmanCode code = compressionMap[letter];
-
-					shiftregister = (shiftregister << code.shift) | code.path;  
-					shiftcount += code.shift;
-					buffer[i] = shiftregister;
-					if (shiftcount >= 7){
-						shiftcount = 0;
-						shiftregister = 0;
-					}
+				shiftregister = (shiftregister << code.shift) | code.path;  
+				shiftcount += code.shift;
+				buffer[i] = shiftregister;
+				if (shiftcount >= 7){
+					shiftcount = 0;
+					shiftregister = 0;
 				}
 			}	
-			fwrite(buffer.data(), buffer.size(), 1, compressed);
+			fwrite(buffer.data(), i, 1, compressed);
 		}
 
 		fclose(compressed);
