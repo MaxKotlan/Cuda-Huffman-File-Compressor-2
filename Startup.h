@@ -56,7 +56,7 @@ inline void Startup::ParseCommandLine(int argc, char** argv) {
 		}
 		if (std::string(argv[i]) == "--cuda")           			 { _cuda = true; }
 		if (std::string(argv[i]) == "--disablefilebuffer")           { _disableFileBuffer = true; }
-		if (std::string(argv[i]) == "--filebuffersize" & i+1 < argc) { _disableFileBuffer = stoi(std::string(argv[i+1])); }
+		if (std::string(argv[i]) == "--filebuffersize" & i+1 < argc) { _fileBufferSize    = stoi(std::string(argv[i+1])); }
 	}
 }
 
