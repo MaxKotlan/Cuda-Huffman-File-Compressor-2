@@ -19,9 +19,9 @@ unsigned char* _device_buffer;
 Node*  _device_hashmap;
 
 void Init(unsigned int bufferSize, FrequencyMap& hashmap){
-    gpuErrchk(cudaMalloc((void **)&_device_buffer,      bufferSize));
-    gpuErrchk(cudaMalloc((void **)&_device_hashmap, hashmap.size()));
-    gpuErrchk(cudaMemcpy(_device_hashmap, hashmap.data(), hashmap.size(), cudaMemcpyHostToDevice));
+    gpuErrchk(cudaMalloc((void **)&_device_buffer,                   bufferSize));
+    gpuErrchk(cudaMalloc((void **)&_device_hashmap, sizeof(Node)*hashmap.size()));
+    gpuErrchk(cudaMemcpy(_device_hashmap, hashmap.data(), sizeof(Node)*hashmap.size(), cudaMemcpyHostToDevice));
     initalized = true;
 }
 
@@ -41,5 +41,5 @@ void CudaGetCharacterFrequencies(FrequencyMap& hashmap, const std::vector<unsign
     float milliseconds = 0;
     cudaEventElapsedTime(&milliseconds, start, stop);
     std::cout << "Cuda Kernel Execution took " << milliseconds << std::endl;
-    gpuErrchk(cudaMemcpy(&hashmap, _device_hashmap, hashmap.size(), cudaMemcpyDeviceToHost));
+    gpuErrchk(cudaMemcpy(hashmap.data(), _device_hashmap, sizeof(Node)*hashmap.size(), cudaMemcpyDeviceToHost));
 }
