@@ -8,15 +8,7 @@
 
 #define MAX_NODES 256
 
-struct Node {
-	unsigned char character;
-	unsigned int frequency;
-	Node* lchild = nullptr;
-	Node* rchild = nullptr;
-	bool operator()(const Node& a, const Node& b) const {
-		return a.frequency > b.frequency;
-	}
-};
+#include "Node.h"
 
 typedef std::vector<Node> FrequencyMap;
 

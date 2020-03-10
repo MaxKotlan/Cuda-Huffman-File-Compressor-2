@@ -7,6 +7,7 @@
 #include <iomanip>
 #include "Startup.h"
 #include "HuffmanTree.h"
+#include "kernels/kernels.h"
 
 typedef std::vector<struct Node> FrequencyMap;
 
@@ -35,13 +36,17 @@ class FileCompressor {
 		std::vector<unsigned char> buffer(bufferSize);
 		for (unsigned int j = 0; j < length; j+= bufferSize){
 			fread(buffer.data(), buffer.size(), 1, original);
-			for (unsigned int i = 0; i < buffer.size() && (j +i) < length; i++) {
+			if (Startup::Instance().UseCuda()){
+				CudaGetCharacterFrequencies(hashmap, buffer);
+			} else {
+				for (unsigned int i = 0; i < buffer.size() && (j +i) < length; i++) {
 
-				unsigned char letter = buffer[i];
-				hashmap[letter].character = letter;
-				hashmap[letter].frequency++;
+					unsigned char letter = buffer[i];
+					hashmap[letter].character = letter;
+					hashmap[letter].frequency++;
 
-			}	
+				}	
+			}
 		}
 		
 		return std::move(hashmap);
@@ -69,6 +74,16 @@ class FileCompressor {
 		std::vector<unsigned char> outputBuffer(bufferSize);
 		outputBuffer.resize(0);
 
+		/*
+		The idea of this algorithm is to encode the file in linear time (with respect to the input file's bytecount)
+		You use a hashmap to retrive two integers, (the path encoded as an integer, but treated like a shift register) 
+		and a bitshift count to know how many bits are being used.
+		Using these two integers, it should be possible to continuously shift them into a globally shared register. 
+		When the shared register fills up to 8 bits, it is saved to an output buffer (which is then saved to a file) as a byte and the 
+		shared register is reset.
+		
+		My implementation almost works. Something is off with it, but in some cases it gets realy close.
+		*/
 		for (unsigned int j = 0; j < length; j+= bufferSize){
 			fread(inputBuffer.data(), inputBuffer.size(), 1, original);
 			unsigned int i = 0;
@@ -93,21 +108,21 @@ class FileCompressor {
 						unsigned char subpath = (code.path >> difference);
 						//unsigned char subpath = (code.path >> 1);
 						shiftregister = shiftregister << remainingBitsToFill;
-						shiftregister = shiftregister | subpath;
-						shiftcount += remainingBitsToFill;
 						code.shift = code.shift - difference;
+						shiftregister = shiftregister | subpath;
 						code.path = ( code.path >> remainingBitsToFill);
 						//code.path = ((code.path << (32 - (code.shift - remainingBitsToFill))) >> remainingBitsToFill >> (32- (code.shift - remainingBitsToFill)));
 
+						//assert(code.shift == 8);
 						//if (shiftcount == 8) {
 							AddToWriteBufferAndResetRegister(outputBuffer, shiftregister, bufferSize);
 							shiftcount = 0;
 							shiftregister = 0;
 						//}
-						shiftcount = code.shift;
+						//shiftcount = code.shift;
 
 
-					} while (shiftcount + code.shift >= 8);
+					} while (0 >= 8);
 				}
 				
 				/*

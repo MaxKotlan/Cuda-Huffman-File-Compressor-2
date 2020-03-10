@@ -21,13 +21,15 @@ public:
 	std::string fileName()        { return _fileName; };
 	bool fileBufferDisabled()     { return _disableFileBuffer; };
 	unsigned int fileBufferSize() { return _fileBufferSize; };
+	bool UseCuda()                { return _cuda; };
 
 private:
 	static Startup* MyInstance(Startup* start);
 
 	Startup(int, char**) : 
 		_fileBufferSize(1024), 
-		_disableFileBuffer(false)
+		_disableFileBuffer(false),
+		_cuda(false)
 	{};
 	~Startup(){ }
 
@@ -35,6 +37,7 @@ private:
 	FileOperation _operation;
 	std::string   _fileName;
 	std::string   _executableName;
+		     bool _cuda;
 	         bool _disableFileBuffer;
 	 unsigned int _fileBufferSize;
 };
@@ -51,6 +54,7 @@ inline void Startup::ParseCommandLine(int argc, char** argv) {
 			_operation = Decompressing;
 			_fileName = std::string(argv[i + 1]);
 		}
+		if (std::string(argv[i]) == "--cuda")           			 { _cuda = true; }
 		if (std::string(argv[i]) == "--disablefilebuffer")           { _disableFileBuffer = true; }
 		if (std::string(argv[i]) == "--filebuffersize" & i+1 < argc) { _disableFileBuffer = stoi(std::string(argv[i+1])); }
 	}
