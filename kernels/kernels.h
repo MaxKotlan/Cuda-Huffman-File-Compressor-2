@@ -6,6 +6,6 @@
 
 typedef std::vector<Node> FrequencyMap;
 
-void CudaGetCharacterFrequencies(FrequencyMap& hashmap, const std::vector<unsigned char>& buffer);
+void CudaGetCharacterFrequencies(FrequencyMap& hashmap, const std::vector<unsigned char>& buffer, unsigned int bufferIteration, unsigned int fileSize);
 
 #endif

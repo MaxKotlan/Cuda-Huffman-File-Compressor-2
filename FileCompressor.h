@@ -37,7 +37,7 @@ class FileCompressor {
 		for (unsigned int j = 0; j < length; j+= bufferSize){
 			fread(buffer.data(), buffer.size(), 1, original);
 			if (Startup::Instance().UseCuda()){
-				CudaGetCharacterFrequencies(hashmap, buffer);
+				CudaGetCharacterFrequencies(hashmap, buffer, j, length);
 			} else {
 				for (unsigned int i = 0; i < buffer.size() && (j +i) < length; i++) {
 
@@ -48,10 +48,6 @@ class FileCompressor {
 				}	
 			}
 		}
-
-		for (int i = 0; i < hashmap.size(); i++)
-			std::cout << hashmap[i].character << hashmap[i].frequency << " ";
-
 		return std::move(hashmap);
 	}
 
