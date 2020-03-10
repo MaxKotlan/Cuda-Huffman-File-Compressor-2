@@ -50,7 +50,7 @@ class FileCompressor {
 		}
 
 		for (int i = 0; i < hashmap.size(); i++)
-			std::cout << hashmap[i].frequency << " ";
+			std::cout << hashmap[i].character << hashmap[i].frequency << " ";
 
 		return std::move(hashmap);
 	}
