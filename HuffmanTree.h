@@ -103,6 +103,21 @@ public:
 	};
 
 
+	void print(){
+		std::function<void(Node*, std::string)> preorder = [&](Node* root, std::string str) {
+		if (root != nullptr) {
+
+				if (isLeaf(root)) {
+					std::cout << "character: " << root->character << " code: " <<  str << std::endl;
+				}
+
+				preorder(root->lchild, str + "0");
+				preorder(root->rchild, str + "1");
+			}
+		};
+		preorder(root, "");
+	}
+
 	/*Generates Header which contains the leaf nodes in the tree append to top of compressed file
 	Stores bytes in little endian order, and stores nodes in preorder. Using the leafnodes, we can regenerate the tree
 	when it's loaded in again

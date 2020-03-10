@@ -11,6 +11,7 @@ int main(int argc, char** argv) {
 		FrequencyMap map = fr.GetCharacterFrequencies();
 		HuffmanTree tree = HuffmanTree(map);
 		tree.printFrequencies();
+		tree.print();
 		fr.saveCompressed(tree);
 	}
 	if (Startup::Instance().fileOperation() == Decompressing){
