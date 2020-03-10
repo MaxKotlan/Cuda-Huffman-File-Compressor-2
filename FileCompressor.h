@@ -5,6 +5,7 @@
 #include <assert.h>
 #include <vector>
 #include <iomanip>
+#include <time.h> 
 #include "Startup.h"
 #include "HuffmanTree.h"
 #include "kernels/kernels.h"
@@ -34,6 +35,7 @@ class FileCompressor {
 		unsigned int bufferSize = Startup::Instance().fileBufferDisabled() ? length : Startup::Instance().fileBufferSize(); 
 
 		std::vector<unsigned char> buffer(bufferSize);
+		clock_t t = clock();
 		for (unsigned int j = 0; j < length; j+= bufferSize){
 			fread(buffer.data(), buffer.size(), 1, original);
 			if (Startup::Instance().UseCuda()){
@@ -48,6 +50,8 @@ class FileCompressor {
 				}	
 			}
 		}
+  		t = clock() - t;
+		std::cout << "Operation Took " << ((float)t)/CLOCKS_PER_SEC << " seconds" << std::endl;
 		return std::move(hashmap);
 	}
 
