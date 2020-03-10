@@ -5,13 +5,11 @@ bool initalized = false;
 
 __global__ void CalculateByteFrequency(Node* hashmap, const unsigned char* filebuffer, unsigned int filebufferSize ){
     int idx = blockDim.x * blockIdx.x + threadIdx.x;
-    if (idx < 10) {
-        if (idx == 0){
-            unsigned char byte = filebuffer[idx];
-            *hashmap = Node {0, 1};
-            //(hashmap+byte)->character = byte;
-            //(hashmap+byte)->frequency++;
-        }
+    if (idx < filebufferSize) {
+        unsigned char byte = filebuffer[idx];
+        //*hashmap = Node {0, 1};
+        hashmap[byte].character = byte;
+        hashmap[byte].frequency++;
     }
 }
 
@@ -44,5 +42,5 @@ void CudaGetCharacterFrequencies(FrequencyMap& hashmap, const std::vector<unsign
     float milliseconds = 0;
     cudaEventElapsedTime(&milliseconds, start, stop);
     //std::cout << "Cuda Kernel Execution took " << milliseconds << std::endl;
-    gpuErrchk(cudaMemcpy(hashmap.data(), _device_hashmap, sizeof(Node)*hashmap.size(), cudaMemcpyDeviceToHost));
+    gpuErrchk(cudaMemcpy(hashmap.data(), _device_hashmap, hashmap.size(), cudaMemcpyDeviceToHost));
 }
