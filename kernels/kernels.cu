@@ -5,12 +5,13 @@ bool initalized = false;
 
 __global__ void CalculateByteFrequency(Node* hashmap, const unsigned char* filebuffer, unsigned int filebufferSize ){
     int idx = blockDim.x * blockIdx.x + threadIdx.x;
-    if (idx < filebufferSize) {
-    
-        unsigned char byte = filebuffer[idx];
-        //hashmap[byte].character = byte;
-        //hashmap[byte].frequency++;
-
+    if (idx < 10) {
+        if (idx == 0){
+            unsigned char byte = filebuffer[idx];
+            *hashmap = Node {0, 1};
+            //(hashmap+byte)->character = byte;
+            //(hashmap+byte)->frequency++;
+        }
     }
 }
 
@@ -19,8 +20,8 @@ unsigned char* _device_buffer;
 Node*  _device_hashmap;
 
 void Init(unsigned int bufferSize, FrequencyMap& hashmap){
-    gpuErrchk(cudaMalloc((void **)&_device_buffer,                   bufferSize));
-    gpuErrchk(cudaMalloc((void **)&_device_hashmap, sizeof(Node)*hashmap.size()));
+    gpuErrchk(cudaMalloc((void **)&_device_buffer,                         bufferSize));
+    gpuErrchk(cudaMalloc((void **)&_device_hashmap,       sizeof(Node)*hashmap.size()));
     gpuErrchk(cudaMemcpy(_device_hashmap, hashmap.data(), sizeof(Node)*hashmap.size(), cudaMemcpyHostToDevice));
     initalized = true;
 }
@@ -34,12 +35,14 @@ void CudaGetCharacterFrequencies(FrequencyMap& hashmap, const std::vector<unsign
     cudaEventCreate(&stop);    
 
     cudaEventRecord(start);
-    CalculateByteFrequency<<< buffer.size() / 1024 + 1, 1024 >>>( hashmap.data(), buffer.data(), buffer.size() );
+    //std::cout << "Initalizing kernel to calculate hashmap on " << hashmap.size() << " elements each of " << sizeof(Node)*hashmap.size() << std::endl;
+
+    CalculateByteFrequency<<< buffer.size() / 1024 + 1, 1024 >>>( _device_hashmap, _device_buffer, buffer.size() );
     cudaEventRecord(stop);
     gpuErrchk(cudaEventSynchronize(stop));
 
     float milliseconds = 0;
     cudaEventElapsedTime(&milliseconds, start, stop);
-    std::cout << "Cuda Kernel Execution took " << milliseconds << std::endl;
+    //std::cout << "Cuda Kernel Execution took " << milliseconds << std::endl;
     gpuErrchk(cudaMemcpy(hashmap.data(), _device_hashmap, sizeof(Node)*hashmap.size(), cudaMemcpyDeviceToHost));
 }
