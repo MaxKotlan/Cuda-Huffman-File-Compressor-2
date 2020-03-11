@@ -8,7 +8,11 @@
 #include <time.h> 
 #include "Startup.h"
 #include "HuffmanTree.h"
+
+#define USE_CUDA
+#if defined USE_CUDA
 #include "kernels/kernels.h"
+#endif
 
 typedef std::vector<struct Node> FrequencyMap;
 
@@ -39,7 +43,9 @@ class FileCompressor {
 		for (unsigned int j = 0; j < length; j+= bufferSize){
 			fread(buffer.data(), buffer.size(), 1, original);
 			if (Startup::Instance().UseCuda()){
-				CudaGetCharacterFrequencies(hashmap, buffer, j, length);
+				#if defined USE_CUDA
+					CudaGetCharacterFrequencies(hashmap, buffer, j, length);
+				#endif
 			} else {
 				for (unsigned int i = 0; i < buffer.size() && (j +i) < length; i++) {
 
