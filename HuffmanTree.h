@@ -128,8 +128,6 @@ public:
 		/*Magic Bytes for Identifying File*/
 		header[0] = 0x1B; header[1] = 0x0B; header[2] = 0x3E; header[3] = 0x70;
 		/*Number of Nodes as a ushort*/
-		//for (int i = 0; i < sizeof(unsigned short); i++)
-	//		header[sizeof(unsigned int)+i] = static_cast<unsigned char*>(static_cast<void*>(&leaf_size))[i];
 		std::copy(static_cast<const unsigned char*>(static_cast<const void*>(&leaf_size)),
 			static_cast<const unsigned char*>(static_cast<const void*>(&leaf_size)) + sizeof(leaf_size),
 			&header[4]);
@@ -141,15 +139,11 @@ public:
 				if (isLeaf(root)){
 					/*Node character*/
 					header[nodeIndex] = root->character;
-					//int test = 0x12345678;
-					/*Node frequency*/
-					//std::cout << "wow: ";
-					//for (int i = 0; i < sizeof(unsigned int); i++) {
-						//header[nodeIndex + sizeof(unsigned char) + i] = static_cast<unsigned int*>(static_cast<void*>(&test))[i];
+
 					std::copy(static_cast<const unsigned char*>(static_cast<const void*>(&root->frequency)),
 						static_cast<const unsigned char*>(static_cast<const void*>(&root->frequency)) + sizeof (root->frequency),
 						&header[nodeIndex+1]);
-					//} //std::cout << " endwow" << std::endl;
+
 					nodeIndex+=sizeof(unsigned char)+sizeof(unsigned int);
 				}
 
