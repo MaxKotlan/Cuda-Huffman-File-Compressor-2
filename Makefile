@@ -1,2 +1,2 @@
 all:
-	nvcc -o Compress main.cpp kernels\kernels.cu
+	nvcc -o Compress main.cpp kernels/kernels.cu
